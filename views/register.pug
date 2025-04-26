@@ -1,0 +1,22 @@
+extends layout
+
+block content
+    .container.text-center.my-5
+        h1 Register
+        form(method="post", action="/auth/register")
+            input(type='hidden', name='_csrf', value=csrfToken)
+            .my-2
+                label(for="email") Email:
+                input#email(type="email" name="email", placeholder="Enter your email", required=true)
+            .my-2
+                label(for="password") Password:
+                input#password(type="password" name="password", placeholder="Enter your password", required=true)
+            .my-2
+                label(for="confirm-password") Confirm Password:
+                input#confirm-password(type="password", placeholder="Confirm your password", required=true)
+            .my-4
+                button(type="submit", class="btn btn-success") Register
+
+        p.mt-4
+            | Already have an account?
+            a(href="/auth/login") Login here
