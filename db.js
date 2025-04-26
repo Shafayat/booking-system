@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 
 // Create or connect to SQLite database
-const db = new sqlite3.Database('./hospital_booking.db', (err) => {
+const db = new sqlite3.Database('./data/hospital_booking.db', (err) => {
     if (err) {
         console.error('Error connecting to database:', err.message);
     } else {
