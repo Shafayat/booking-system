@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import expressLayouts from 'express-ejs-layouts';
 import { fileURLToPath } from 'url';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -24,6 +25,13 @@ app.set('view engine', 'ejs');
 app.use(expressLayouts);
 app.set('layout', 'layout');
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(cookieParser());
+app.use((req, res, next) => {
+    // If JWT auth is in cookies; adjust if you use sessions or headers instead
+    const token = req.cookies && req.cookies.token;
+    res.locals.loggedIn = !!token;
+    next();
+});
 
 // Sync models
 sequelize.sync();

@@ -2,17 +2,35 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import validator from 'validator';
 import { findUserByUsername, createUser } from '../services/userService.js';
-
+import jwt from "jsonwebtoken";
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 
-// Render register form
+/**
+ * Handle user registration
+ *
+ * GET /register
+ *
+ * @param {string} username - Username
+ * @param {string} password - Password
+ *
+ * @returns {Promise<void>}
+ */
 router.get('/register', (req, res) => {
-    res.render('register', { title: 'Register' });
+    const token = req.cookies && req.cookies.token;
+    if (token) return res.redirect('/me');
+    res.render('register', { title: 'Register', error: null, username: '' });
 });
 
-// Handle register logic
-// After registration, redirect to login with a "registered" flag
+/**
+ * Handle user registration
+ *
+ * POST /register
+ *
+ * @param {string} username - Username
+ * @param {string} password - Password
+ *
+ * @returns {Promise<void>}
+ */
 router.post('/register', async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password)
@@ -43,14 +61,34 @@ router.post('/register', async (req, res) => {
 });
 
 
-// Render login form
+/**
+ * Show login form
+ *
+ * GET /login
+ *
+ * If user is already logged in, redirect to /me
+ *
+ * @returns {Promise<void>}
+ */
 router.get('/login', (req, res) => {
+    const token = req.cookies && req.cookies.token;
+    if (token) return res.redirect('/me');
     const registered = req.query.registered;
     res.render('login', { title: 'Login', registered });
 });
 
 
-// Handle login logic
+
+/**
+ * Handle login logic
+ *
+ * POST /login
+ *
+ * @param {string} username - Email address
+ * @param {string} password - Password
+ *
+ * @returns {Promise<void>}
+ */
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
     const user = await findUserByUsername(username);
@@ -59,8 +97,30 @@ router.post('/login', async (req, res) => {
     const match = await bcrypt.compare(password, user.passwordHash);
     if (!match)
         return res.status(400).render('login', { title: 'Login', error: 'Invalid credentials' });
-    // For demo, just render profile page (token/jwt would be for API)
-    res.render('me', { title: 'Profile', user });
+
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    res.cookie('token', token, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax'
+    });
+
+    res.redirect('/me');
 });
+
+/**
+ * Clear the JWT token cookie and redirect to /login
+ *
+ * GET /logout
+ *
+ * @returns {Promise<void>}
+ */
+router.get('/logout', (req, res) => {
+    res.clearCookie('token');
+    res.redirect('/login');
+});
+
 
 export default router;
