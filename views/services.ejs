@@ -13,6 +13,7 @@
                     <label for="bookingDate" class="form-label">Select Date</label>
                     <input type="date" id="bookingDate" name="bookingDate" class="form-control" required>
                 </div>
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <button class="btn btn-primary btn-sm" type="submit">Book</button>
             </form>
         </li>

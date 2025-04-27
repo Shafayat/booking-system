@@ -47,6 +47,13 @@ router.post('/register', async (req, res) => {
             username
         });
 
+    if (!isStrongPassword(password))
+        return res.status(400).render('register', {
+            title: 'Register',
+            error: 'Password must be at least 8 characters, include uppercase, lowercase, number, and symbol.',
+            username
+        });
+
     const exist = await findUserByUsername(username);
     if (exist)
         return res.status(400).render('register', {
@@ -121,6 +128,24 @@ router.get('/logout', (req, res) => {
     res.clearCookie('token');
     res.redirect('/login');
 });
+
+
+/**
+ * Check if the given password is strong enough.
+ *
+ * @param {string} password - Password to check
+ *
+ * @returns {boolean} - Whether the password is strong enough
+ */
+function isStrongPassword(password) {
+    return validator.isStrongPassword(password, {
+        minLength: 8,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+        minSymbols: 1
+    });
+}
 
 
 export default router;

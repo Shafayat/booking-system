@@ -6,6 +6,7 @@ import path from 'path';
 import expressLayouts from 'express-ejs-layouts';
 import {fileURLToPath} from 'url';
 import cookieParser from 'cookie-parser';
+import csurf from 'csurf';
 import seed from './db/seed.js';
 
 dotenv.config();
@@ -19,6 +20,21 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+app.use(cookieParser());
+app.use(
+    csurf({
+        cookie: true // Store token in a cookie
+    })
+);
+
+// Add CSRF token to all rendered views
+app.use((req, res, next) => {
+    if (req.csrfToken) {
+        res.locals.csrfToken = req.csrfToken();
+    }
+    next();
+});
+
 
 // Set EJS view engine and views path
 app.set('views', path.join(__dirname, 'views'));
@@ -26,7 +42,12 @@ app.set('view engine', 'ejs');
 app.use(expressLayouts);
 app.set('layout', 'layout');
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cookieParser());
+app.use((req, res, next) => {
+    const token = req.cookies && req.cookies.token;
+    res.locals.loggedIn = !!token;
+    next();
+});
+
 app.use((req, res, next) => {
     // If JWT auth is in cookies; adjust if you use sessions or headers instead
     const token = req.cookies && req.cookies.token;
