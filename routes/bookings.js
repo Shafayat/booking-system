@@ -1,8 +1,8 @@
-import { Router } from 'express';
+import {Router} from 'express';
 import Booking from '../models/booking.js';
 import Service from '../models/service.js';
 import Hospital from '../models/hospital.js';
-import { authMiddleware } from '../middleware/auth.js';
+import {authMiddleware} from '../middleware/auth.js';
 
 const router = Router();
 router.use(authMiddleware);
@@ -21,10 +21,11 @@ router.post('/book', async (req, res) => {
     if (!req.user) {
         return res.redirect('/login');
     }
-    const { serviceId } = req.body;
+    const {serviceId, bookingDate} = req.body;
     await Booking.create({
         UserId: req.user.id,
         ServiceId: serviceId,
+        bookingDate: bookingDate,
         status: 'booked'
     });
     res.redirect('/booking/mine');
@@ -43,15 +44,14 @@ router.get('/mine', async (req, res) => {
         return res.redirect('/login');
     }
     const bookings = await Booking.findAll({
-        where: { UserId: req.user.id },
+        where: {UserId: req.user.id},
         include: [
-            { model: Service, include: [Hospital] }
+            {model: Service, include: [Hospital]}
         ],
         order: [['bookingDate', 'DESC']]
     });
-    res.render('my_bookings', { title: 'My Booked Services', bookings });
+    res.render('my_bookings', {title: 'My Booked Services', bookings});
 });
-
 
 
 /**
@@ -70,7 +70,7 @@ router.post('/:id/remove', async (req, res) => {
         }
     });
     if (!booking) {
-        return res.status(404).render('error', { title: 'Not found', message: 'Booking not found.' });
+        return res.status(404).render('error', {title: 'Not found', message: 'Booking not found.'});
     }
     await booking.destroy();
     res.redirect('/booking/mine');

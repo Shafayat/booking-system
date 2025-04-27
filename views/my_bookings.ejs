@@ -9,7 +9,7 @@
                     <b><%= booking.Service.name %></b>
                     <div><%= booking.Service.description %></div>
                     <div class="text-muted">At <%= booking.Service.Hospital.name %></div>
-                    <div class="text-muted">Booked on <%= booking.bookingDate.toLocaleString() %></div>
+                    <div class="text-muted">Booked for: <%= booking.bookingDate.toLocaleDateString() %></div>
                     <span class="badge bg-success"><%= booking.status %></span>
                 </div>
                 <form action="/booking/<%= booking.id %>/remove" method="post" class="mb-0">
