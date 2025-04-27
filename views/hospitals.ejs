@@ -1,0 +1,9 @@
+<h1>Hospitals</h1>
+<ul class="list-group">
+    <% hospitals.forEach(function(hospital) { %>
+        <li class="list-group-item">
+            <a href="/hospital/<%= hospital.id %>/services"><%= hospital.name %></a>
+            <small class="text-muted">- <%= hospital.address %></small>
+        </li>
+    <% }); %>
+</ul>

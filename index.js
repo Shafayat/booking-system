@@ -4,8 +4,9 @@ import routes from './routes/index.js';
 import dotenv from 'dotenv';
 import path from 'path';
 import expressLayouts from 'express-ejs-layouts';
-import { fileURLToPath } from 'url';
+import {fileURLToPath} from 'url';
 import cookieParser from 'cookie-parser';
+import seed from './db/seed.js';
 
 dotenv.config();
 
@@ -17,7 +18,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 
 // Set EJS view engine and views path
 app.set('views', path.join(__dirname, 'views'));
@@ -41,9 +42,14 @@ app.use('/', routes);
 
 // Simple home page
 app.get('/', (req, res) => {
-    res.render('index', { title: 'Home' });
+    res.render('index', {title: 'Home'});
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+
+sequelize.sync().then(async () => {
+    await seed();
+    app.listen(PORT, () => {
+        console.log(`Server running at http://localhost:${PORT}`);
+    });
 });
+

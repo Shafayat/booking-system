@@ -17,8 +17,10 @@
                     <li class="nav-item"><a href="/register" class="nav-link">Register</a></li>
                     <li class="nav-item"><a href="/login" class="nav-link">Login</a></li>
                 <% } %>
-                <li class="nav-item"><a href="/me" class="nav-link">Profile</a></li>
                 <% if (loggedIn) { %>
+                    <li class="nav-item"><a href="/hospital/list" class="nav-link">Hospitals</a></li>
+                    <li class="nav-item"><a href="/booking/mine" class="nav-link">My Booked Services</a></li>
+                    <li class="nav-item"><a href="/me" class="nav-link">Profile</a></li>
                     <li class="nav-item">
                         <form action="/logout" method="get" class="d-inline">
                             <button type="submit" class="btn btn-link nav-link">Logout</button>
