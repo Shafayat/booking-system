@@ -4,39 +4,26 @@ import Service from '../models/service.js';
 import { authMiddleware } from '../middleware/auth.js';
 
 const router = Router();
-router.use(authMiddleware);
-
 
 /**
- * List all hospitals
- *
- * GET /hospitals
- *
- * @returns {Promise<void>}
+ * List all hospitals (API)
+ * GET /api/hospitals/list
  */
-router.get('/list', async (req, res) => {
+router.get('/list', authMiddleware, async (req, res) => {
     const hospitals = await Hospital.findAll();
-    res.render('hospitals', { title: 'Hospitals', hospitals });
+    res.json({ hospitals });
 });
 
-
 /**
- * List all services for a hospital
- *
- * GET /hospitals/:id/services
- *
- * @param {string} id - Hospital ID
- *
- * @returns {Promise<void>}
+ * List services for a hospital (API)
+ * GET /api/hospitals/:id/services
  */
-router.get('/:id/services', async (req, res) => {
-    const hospital = await Hospital.findByPk(req.params.id, {
-        include: [Service]
-    });
+router.get('/:id/services', authMiddleware, async (req, res) => {
+    const hospital = await Hospital.findByPk(req.params.id, { include: [Service] });
     if (!hospital) {
-        return res.status(404).render('404', { title: 'Not Found' });
+        return res.status(404).json({ error: 'Hospital not found' });
     }
-    res.render('services', { title: `${hospital.name} Services`, hospital, services: hospital.Services });
+    res.json({ hospital, services: hospital.Services });
 });
 
 export default router;

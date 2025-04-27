@@ -1,80 +1,64 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import Booking from '../models/booking.js';
 import Service from '../models/service.js';
 import Hospital from '../models/hospital.js';
-import {authMiddleware} from '../middleware/auth.js';
+import { authMiddleware } from '../middleware/auth.js';
 
 const router = Router();
-router.use(authMiddleware);
-
 
 /**
- * Book a service
- *
+ * Book a service (API)
  * POST /booking/book
- *
- * @param {string} serviceId - Service ID
- *
- * @returns {Promise<void>}
  */
-router.post('/book', async (req, res) => {
-    if (!req.user) {
-        return res.redirect('/login');
+router.post('/book', authMiddleware, async (req, res) => {
+    if (!req.userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
     }
-    const {serviceId, bookingDate} = req.body;
-    await Booking.create({
-        UserId: req.user.id,
+    const { serviceId, bookingDate } = req.body;
+    const booking = await Booking.create({
+        UserId: req.userId,
         ServiceId: serviceId,
         bookingDate: bookingDate,
         status: 'booked'
     });
-    res.redirect('/booking/mine');
+    res.status(201).json({ success: true, booking });
 });
 
-
 /**
- * List all bookings for the current user
- *
- * GET /bookings/mine
- *
- * @returns {Promise<void>}
+ * List current user's bookings (API)
+ * GET /booking/mine
  */
-router.get('/mine', async (req, res) => {
-    if (!req.user) {
-        return res.redirect('/login');
-    }
+router.get('/mine', authMiddleware, async (req, res) => {
     const bookings = await Booking.findAll({
-        where: {UserId: req.user.id},
+        where: {
+            UserId: req.userId
+        },
         include: [
-            {model: Service, include: [Hospital]}
-        ],
-        order: [['bookingDate', 'DESC']]
+            {
+                model: Service,
+                include: [Hospital]
+            }
+        ]
     });
-    res.render('my_bookings', {title: 'My Booked Services', bookings});
+    res.status(200).json({ success: true, bookings });
 });
 
-
 /**
- * DELETE: Cancel a booking
- *
- * This route requires the user to be logged in and the booking
- * to belong to the current user.
- *
- * @param {number} id - The booking ID
+ * Cancel a booking (API)
+ * POST /booking/:id/remove
  */
-router.post('/:id/remove', async (req, res) => {
+router.post('/:id/remove', authMiddleware, async (req, res) => {
     const booking = await Booking.findOne({
         where: {
             id: req.params.id,
-            UserId: req.user.id
+            UserId: req.userId
         }
     });
     if (!booking) {
-        return res.status(404).render('error', {title: 'Not found', message: 'Booking not found.'});
+        return res.status(404).json({ error: 'Booking not found.' });
     }
     await booking.destroy();
-    res.redirect('/booking/mine');
+    res.json({ success: true });
 });
-
 
 export default router;

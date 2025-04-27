@@ -7,11 +7,11 @@
                 <div><%= service.description %></div>
                 <div class="text-muted">Price: $<%= service.price %></div>
             </div>
-            <form action="/booking/book" method="post" class="mb-0">
+            <form action="/api/booking/book" method="post" class="mb-0 booking-form">
                 <input type="hidden" name="serviceId" value="<%= service.id %>">
                 <div class="mb-3">
-                    <label for="bookingDate" class="form-label">Select Date</label>
-                    <input type="date" id="bookingDate" name="bookingDate" class="form-control" required>
+                    <label for="bookingDate-<%= service.id %>" class="form-label">Select Date</label>
+                    <input type="date" id="bookingDate-<%= service.id %>" name="bookingDate" class="form-control" required>
                 </div>
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <button class="btn btn-primary btn-sm" type="submit">Book</button>
@@ -20,3 +20,37 @@
     <% }); %>
 </ul>
 <a href="/hospital/list" class="btn btn-secondary">Back to Hospitals</a>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.booking-form').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+                const params = new URLSearchParams();
+                formData.forEach((value, key) => {
+                    params.append(key, value);
+                });
+
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: params
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.href = '/booking/list';
+                        } else {
+                            response.json().then(data => {
+                                alert(data.error || 'Booking failed');
+                            });
+                        }
+                    })
+                    .catch(() => alert('Booking failed'));
+            });
+        });
+    });
+</script>
