@@ -1,3 +1,4 @@
+@ -1,72 +0,0 @@
 # Node.js dependencies
 node_modules/
 npm-debug.log*
@@ -70,3 +71,4 @@ pm2*.log
 # ESLint and Prettier cache
 .eslintcache
 .prettiercache
+/database.sqlite

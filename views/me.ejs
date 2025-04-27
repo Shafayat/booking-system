@@ -1,0 +1,7 @@
+<h2>Profile</h2>
+<% if (user) { %>
+    <p><b>Username:</b> <%= user.username %></p>
+    <p><b>ID:</b> <%= user.id %></p>
+<% } else { %>
+    <p>Please login to see your profile.</p>
+<% } %>
